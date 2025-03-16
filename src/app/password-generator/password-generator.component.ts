@@ -57,4 +57,17 @@ export class PasswordGeneratorComponent {
     this.password = generatedPassword;
     this.calculateStrength();
   }
+
+  copyToClipboard() {
+    if (this.password) {
+      this._clipboard.copy(this.password);
+      this._snackBar.open('Password copied to clipboard!', 'Close', { duration: 2000 });
+    }
+  }
+
+  getStrengthClass(): string {
+    if (this.passeordStrength < 40) return 'weak';
+    if (this.passeordStrength < 70) return 'medium';
+    return 'strong';
+  }
 }
