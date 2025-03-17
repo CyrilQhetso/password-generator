@@ -12,62 +12,80 @@ export class PasswordGeneratorComponent {
 
   password: string = '';
   length: number = 12;
-  useUpperCase: boolean = true;
-  useLowerCase: boolean = true;
+  useUppercase: boolean = true;
+  useLowercase: boolean = true;
   useNumbers: boolean = true;
   useSymbols: boolean = true;
-  passeordStrength: number = 0;
+  strength: number = 0;
+  isGenerating: boolean = false;
+  isCopying: boolean = false;
+  
 
   private upperCaseChars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
   private lowerCaseChars = 'abcdefghijklmnopqrstuvwxyz';
   private numberChars = '0123456789';
-  private symbolsChars = '!@#$%^&*()_+-[]|;:,.<>?';
+  private symbolChars = '!@#$%^&*()_+-=[]{}|;:,.<>?';
 
-  constructor(private _clipboard: Clipboard, private _snackBar: MatSnackBar) {}
+  constructor(private clipboard: Clipboard, private snackBar: MatSnackBar) {}
 
-  private calculateStrength() {
-    let strength = 0;
-    if (this.useUpperCase) strength++;
-    if (this.useLowerCase) strength++;
-    if (this.useNumbers) strength++;
-    if (this.useSymbols) strength++;
+  generatePassword(): void {
+    this.isGenerating = true;
+    setTimeout(() => {
+      this.isGenerating = false;
+
+      let chars = '';
+      if (this.useUppercase) chars += this.upperCaseChars;
+      if (this.useLowercase) chars += this.lowerCaseChars;
+      if (this.useNumbers) chars += this.numberChars;
+      if (this.useSymbols) chars += this.symbolChars;
+
+      if (!chars) {
+        this.snackBar.open('Please select at least one character type!', 'Close', { duration: 3000 });
+        return;
+      }
+
+      let generatedPassword = '';
+      for (let i = 0; i < this.length; i++) {
+        const randomIndex = Math.floor(Math.random() * chars.length);
+        generatedPassword += chars[randomIndex];
+      }
+
+      this.password = generatedPassword;
+      this.calculateStrength();
+    }, 1000);
+  }
+
+  private calculateStrength(): void {
+    let strengthPoints = 0;
+    if (this.useUppercase) strengthPoints++;
+    if (this.useLowercase) strengthPoints++;
+    if (this.useNumbers) strengthPoints++;
+    if (this.useSymbols) strengthPoints++;
     
-    strength += Math.floor(this.length / 8);
-    this.passeordStrength = Math.min(strength * 25, 100);
-  }
-  
-  generatePassword() {
-    let chars = '';
-    if (this.useUpperCase) chars += this.upperCaseChars;
-    if (this.useLowerCase) chars += this.lowerCaseChars;
-    if (this.useNumbers) chars += this.numberChars;
-    if (this.useSymbols) chars += this.symbolsChars;
-
-    if (!chars) {
-      this._snackBar.open('Please select at least one character type!', 'Close', { duration: 3000 });
-      return;
-    }
-
-    let generatedPassword = '';
-    for (let i = 0; i < this.length; i++) {
-      const randomIndex = Math.floor(Math.random() * chars.length);
-      generatedPassword += chars[randomIndex];
-    }
-
-    this.password = generatedPassword;
-    this.calculateStrength();
+    strengthPoints += Math.floor(this.length / 8);
+    this.strength = Math.min(strengthPoints * 25, 100);
   }
 
-  copyToClipboard() {
+  copyToClipboard(): void {
     if (this.password) {
-      this._clipboard.copy(this.password);
-      this._snackBar.open('Password copied to clipboard!', 'Close', { duration: 2000 });
+      this.isCopying = true;
+      this.clipboard.copy(this.password);
+      setTimeout(() => {
+        this.isCopying = false;
+        this.snackBar.open('Password copied to clipboard!', 'Close', { duration: 2000 });
+      }, 1000);
     }
+  }
+
+  getStrengthText(): string {
+    if (this.strength < 40) return 'Weak';
+    if (this.strength < 70) return 'Medium';
+    return 'Strong';
   }
 
   getStrengthClass(): string {
-    if (this.passeordStrength < 40) return 'weak';
-    if (this.passeordStrength < 70) return 'medium';
-    return 'strong';
+    if (this.strength < 40) return 'strength-weak';
+    if (this.strength < 70) return 'strength-medium';
+    return 'strength-strong';
   }
 }
