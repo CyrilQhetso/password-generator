@@ -52,7 +52,7 @@ export class PasswordGeneratorComponent {
 
       this.password = generatedPassword;
       this.calculateStrength();
-    }, 1000);
+    }, 500);
   }
 
   private calculateStrength(): void {
@@ -72,7 +72,7 @@ export class PasswordGeneratorComponent {
       this.clipboard.copy(this.password);
       setTimeout(() => {
         this.isCopying = false;
-        this.snackBar.open('Password copied to clipboard!', 'Close', { duration: 2000 });
+        this.snackBar.open('Password copied to clipboard!', 'Close', { duration: 3000 });
       }, 1000);
     }
   }
